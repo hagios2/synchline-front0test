@@ -18,11 +18,11 @@
               :categories="categories"
               v-show="showAddPostModal"
               @hide-modal="showAddPostModal=false"
-              @add-post="addPost"
+              @add-post="getBlogPost()"
           />
 
           <div class="mt-6" v-for="post in posts" :key="post.id">
-            <post :data="post"></post>
+            <post :isAuth="isAuth" :data="post" @liked-post="getBlogPost()"></post>
           </div>
           <div class="mt-8">
             <Pagination></Pagination>
@@ -59,10 +59,8 @@ import Categories from "@/components/sections-categories-list";
 import RecentPost from "@/components/sections-recent-article";
 import SimpleFooter from "@/components/navigation-footer-simple-with-icon";
 import AddBlogModal from "@/components/AddBlogModal.vue";
-import axios from "axios"
 import Cookies from "js-cookie";
 import moment from "moment";
-import swal from 'sweetalert'
 
 export default {
   name: 'app',
@@ -86,6 +84,7 @@ export default {
         {
           id: 1,
           date: "Jun 1, 2020",
+          likes: [],
           tag: "Laravel",
           title: "Build Your New Idea with Laravel Freamwork.",
           body: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempora expedita dicta totam aspernatur doloremque. Excepturi iste iusto eos enim reprehenderit nisi, accusamus delectus nihil quis facere in modi ratione libero!",
@@ -105,7 +104,7 @@ export default {
   },
   methods: {
     async getCategories() {
-      const response = await axios.get('http://localhost:7000/category')
+      const response = await this.axios.get('/category')
       this.categories = response.data.data.map((category) => {
         return {
           id: category._id,
@@ -114,7 +113,7 @@ export default {
       });
     },
     async getBlogPost() {
-      const response = await axios.get('http://localhost:7000/blogs')
+      const response = await this.axios.get('blogs')
       this.posts = response.data.data.map((blog) => {
         return {
           id: blog._id,
@@ -122,25 +121,13 @@ export default {
           tag: blog.tags[0],
           title: blog.title,
           body: blog.content,
-          likes: blog.likes,
+          likes: blog.likes ?? [],
+          comments: blog.comments,
           image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=731&q=80",
           userName: blog?.user?.username
         }
       });
     },
-    addPost(response){
-      const blog = response.data
-      this.posts.push({
-        id: blog._id,
-        date: moment(blog.publicationDate).format('MM/DD/YYYY'),
-        tag: blog.tags[0],
-        title: blog.title,
-        body: blog.content,
-        likes: blog.likes,
-        image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=731&q=80",
-        userName: blog?.user?.username
-      })
-    }
   },
 }
 </script>

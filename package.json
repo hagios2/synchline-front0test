@@ -11,6 +11,10 @@
     "@ckeditor/ckeditor5-build-classic": "^41.3.1",
     "@ckeditor/ckeditor5-vue2": "^3.0.1",
     "@fortawesome/fontawesome-free": "^6.5.2",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/vue-fontawesome": "^2.0.10",
     "@popperjs/core": "^2.11.8",
     "autoprefixer": "^9.7.4",
     "axios": "^1.6.8",
@@ -22,6 +26,7 @@
     "sweetalert": "^2.1.2",
     "tailwindcss": "^1.2.0",
     "vue": "^2.6.10",
+    "vue-axios": "^3.5.2",
     "vue-router": "^3.6.5"
   },
   "devDependencies": {

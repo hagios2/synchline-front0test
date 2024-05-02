@@ -9,35 +9,52 @@
             <p class="mt-2 text-gray-600">{{ data.body }}</p>
         </div>
         <div class="flex items-center mt-4">
-          <div class="">
-            <a class="text-blue-500 hover:underline mx-0.25" href="#">Read more</a>
-            <a class="text-blue-500 hover:underline mr-0.25" href="#">Comment</a>
-            <a @click="likePost(data.id)" class="text-blue-500 hover:underline mr-0.25" href="#">Like &emsp13; {{data.likes.length > 0 ? data.likes.length : ''}}</a>
-          </div>
-            <div>
-                <a class="flex items-center" href="#">
-                    <img class="mx-4 w-10 h-10 object-cover rounded-full hidden sm:block" :src="data.image" alt="avatar">
-                    <h1 class="text-gray-700 font-bold hover:underline">{{ data.userName }}</h1>
-                </a>
+          <div class="flex justify-between w-2.5">
+            <div class="">
+              <a class="text-blue-500 hover:underline" href="#">Read more</a>
             </div>
+            <div  v-show="isAuth">
+              <a  @click="showCommentModal=true"  data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="text-blue-500 hover:underline px-3" href="javascript:void(0);">Comment</a>
+
+              <CommentModal
+                  :blogId="data.id"
+                  v-if="showCommentModal"
+                  @hide-modal="showCommentModal=false"
+              />
+            </div>
+            <font-awesome-icon icon="fa-solid fa-house" />
+            <div v-show="isAuth">
+              <a @click="likePost(data.id)" class="text-blue-500 hover:underline mr-0.25" href="javascript:void(0);">Like &emsp13; {{data.likes.length > 0 ? data.likes.length : ''}}</a>
+            </div>
+          </div>
+          <div>
+              <a class="flex items-center" href="#">
+                  <img class="mx-4 w-10 h-10 object-cover rounded-full hidden sm:block" :src="data.image" alt="avatar">
+                  <h1 class="text-gray-700 font-bold hover:underline">{{ data.userName }}</h1>
+              </a>
+          </div>
         </div>
     </div>
 </template>
 
 <script>
-    import axios from "axios";
-    import Cookies from "js-cookie";
+import CommentModal from "@/components/CommentModal.vue";
 
-    export default {
-        props: ['data'],
+export default {
+  components: {CommentModal},
+      props: ['data', 'isAuth'],
+        data(){
+          return {
+            showCommentModal: false,
+          }
+        },
         methods: {
           async likePost(postId) {
-            const response = await axios.post(`http://localhost:7000/blogs/${postId}/like`, {}, {
-              headers: {'Authorization': 'Bearer ' + Cookies.get('authToken')}
-            })
+            const response = await this.axios.post(`/blogs/${postId}/like`)
 
-            // eslint-disable-next-line no-console
-            console.log('responsee', response)
+            if (response.status === 200 ) {
+              this.$emit('liked-post')
+            }
           }
         }
     }

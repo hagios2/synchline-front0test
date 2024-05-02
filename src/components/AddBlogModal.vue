@@ -1,7 +1,6 @@
 <script>
-import axios from "axios";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import Cookies from "js-cookie";
+import swal from 'sweetalert'
 
 export default {
   name: "AddBlogModal.vue",
@@ -24,24 +23,35 @@ export default {
         title: this.title,
         tag: this.tags.split(','),
         content: this.editorData,
-        category: this.category?._id ?? '662f2e85aef4af2d960b3d60',
+        // category: this.category?._id ?? '662f2e85aef4af2d960b3d60',
         publicationDate: this.publicationDate
       }
-      const response = await axios.post('http://localhost:7000/blogs', data, {
-        headers: {'Authorization': 'Bearer ' + Cookies.get('authToken')}
-      })
+      const response = await this.axios.post('/blogs', data)
 
-      // eslint-disable-next-line no-console
-      console.log(response)
+      // // eslint-disable-next-line no-console
+      // console.log(response.data.error)
 
-      this.title = ''
-      this.tags = ''
-      this.editorData = ''
-      this.category = ''
-      this.publicationDate = ''
+      if (response.status === 200) {
+        await swal({
+          text: "Added post successfully",
+          icon: "success",
+          closeOnClickOutside: false,
+        });
 
-      this.$emit('add-post', response)
+        this.title = ''
+        this.tags = ''
+        this.editorData = ''
+        this.category = ''
+        this.publicationDate = ''
 
+        this.$emit('add-post', response)
+      } else  {
+        await swal({
+          text: response.data,
+          icon: "success",
+          closeOnClickOutside: false,
+        });
+      }
     }
   }
 }
@@ -102,7 +112,6 @@ export default {
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>

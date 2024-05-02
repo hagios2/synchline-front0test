@@ -26,6 +26,7 @@
 
 <script>
 import Cookies from 'js-cookie';
+import axios from "axios";
     export default {
         data() {
             return {
@@ -44,10 +45,14 @@ import Cookies from 'js-cookie';
           );
         },
         methods: {
-          logout() {
+          async logout() {
+            await axios.post('http://localhost:6000/auth/logout', {
+              refreshToken: Cookies.get('refreshToken')
+            })
+
             Cookies.remove('authToken')
             Cookies.remove('refreshToken')
-            this.$router.push('/login')
+            await this.$router.push('/login')
           }
         }
     }
