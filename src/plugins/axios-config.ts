@@ -30,7 +30,7 @@ axios.interceptors.response.use(
                 } else {
                     return Promise.reject(error.response);
                 }
-            } else if (error.response.status === 403 && error.response.data.error == 'Token expired' ) {
+            } else if (error.response.status === 403 && error.response.data.error.message == 'jwt expired' ) {
                 Cookies.remove('authToken')
                 Cookies.remove('refreshToken')
                 Cookies.remove('authUser')

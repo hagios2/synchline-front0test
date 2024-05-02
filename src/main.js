@@ -4,11 +4,18 @@ import router from "@/router";
 import CKEditor from '@ckeditor/ckeditor5-vue2';
 import axios from 'axios'
 import VueAxios from "vue-axios";
-// import { FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import './plugins/axios-config.ts'
+import Pusher from 'pusher-js';
 
 
 Vue.config.productionTip = false
+
+
+const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
+  cluster: process.env.VUE_APP_PUSHER_CLUSTER,
+});
+
+Vue.prototype.$pusher = pusher;
 
 Vue.use(CKEditor);
 Vue.use(VueAxios, axios)

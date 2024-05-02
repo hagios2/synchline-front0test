@@ -21,6 +21,9 @@ export default {
   },
   mounted() {
     this.getComments()
+
+    const channel = this.$pusher.subscribe('synchline-channel');
+    channel.bind('new-comment', () => this.getComments())
   },
   methods: {
     async getComments(){

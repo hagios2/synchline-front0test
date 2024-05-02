@@ -7,7 +7,7 @@
         <div class="w-full lg:w-8/12">
           <div class="flex items-center justify-between">
             <h1 class="text-xl font-bold text-gray-700 md:text-2xl">Post</h1>
-            <post-filter></post-filter>
+<!--            <post-filter></post-filter>-->
             <button @click="showAddPostModal=true" v-show="isAuth" data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
               Add Blog Post
             </button>
@@ -16,17 +16,24 @@
           <!-- Main modal -->
           <AddBlogModal
               :categories="categories"
-              v-show="showAddPostModal"
+              v-if="showAddPostModal"
               @hide-modal="showAddPostModal=false"
               @add-post="getBlogPost()"
           />
 
           <div class="mt-6" v-for="post in posts" :key="post.id">
-            <post :isAuth="isAuth" :data="post" @liked-post="getBlogPost()"></post>
+            <post
+                :isAuth="isAuth"
+                :data="post"
+                :categories="categories"
+                @liked-post="getBlogPost"
+                @updated-post="getBlogPost"
+                @post-deleted="getBlogPost"
+            ></post>
           </div>
-          <div class="mt-8">
-            <Pagination></Pagination>
-          </div>
+<!--          <div class="mt-8">-->
+<!--            <Pagination></Pagination>-->
+<!--          </div>-->
         </div>
         <div class="-mx-8 w-4/12 hidden lg:block">
           <div class="px-8">
@@ -51,9 +58,7 @@
 
 <script>
 import Navbar from "@/components/navigation-navbar-simple";
-import PostFilter from "@/components/elements-select-option";
 import Post from "@/components/elements-blog-post-article-review";
-import Pagination from "@/components/elements-pagination";
 import UsersList from "@/components/sections-blog-users-list";
 import Categories from "@/components/sections-categories-list";
 import RecentPost from "@/components/sections-recent-article";
@@ -66,9 +71,9 @@ export default {
   name: 'app',
   components: {
     Navbar,
-    PostFilter,
+    // PostFilter,
     Post,
-    Pagination,
+    // Pagination,
     UsersList,
     Categories,
     RecentPost,
@@ -99,8 +104,25 @@ export default {
     this.getCategories()
     this.isAuth = Cookies.get('authToken') !== undefined
 
-    // eslint-disable-next-line no-console
-    console.log('month auth', this.isAuth)
+    const channel = this.$pusher.subscribe('synchline-channel');
+    channel.bind('new-blog', data => {
+          const blog = data
+          const formattedData = {
+            id: blog._id,
+            date: moment(blog.publicationDate).format('MM/DD/YYYY'),
+            tag: blog.tags[0],
+            title: blog.title,
+            body: blog.content,
+            likes: blog.likes ?? [],
+            category: blog.category,
+            comments: blog.comments,
+            image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=731&q=80",
+            userName: blog?.user?.username,
+            user: blog?.user
+          }
+
+          this.posts.unshift(formattedData)
+    });
   },
   methods: {
     async getCategories() {
@@ -122,9 +144,11 @@ export default {
           title: blog.title,
           body: blog.content,
           likes: blog.likes ?? [],
+          category: blog.category,
           comments: blog.comments,
           image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=731&q=80",
-          userName: blog?.user?.username
+          userName: blog?.user?.username,
+          user: blog?.user
         }
       });
     },

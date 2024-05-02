@@ -141,7 +141,7 @@ export default {
         if (response.data.data.token) {
           Cookies.set('authToken', response.data.data.token);
           Cookies.set('refreshToken', response.data.data.refreshToken);
-          Cookies.set('authUser', response.data.data.authUser);
+          Cookies.set('authUser', JSON.stringify(response.data.data.authUser));
           await this.$router.push('/')
         }
       } catch (err) {

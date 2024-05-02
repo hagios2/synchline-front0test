@@ -4,7 +4,7 @@ import swal from 'sweetalert'
 
 export default {
   name: "AddBlogModal.vue",
-  props:  ['categories'],
+  props:  ['categories', 'blog'],
   data() {
     return {
       editor: ClassicEditor,
@@ -19,6 +19,21 @@ export default {
       categoryErr: false,
       editorDataErr: false,
     }
+  },
+  watch: {
+    blog(blog) {
+      // eslint-disable-next-line no-console
+      console.log('blog', blog)
+
+      if (blog) {
+        this.editorData = blog.body
+        this.title = blog.title
+        this.tags = blog.tags?.toString()
+        this.category = blog.category
+        this.publicationDate = blog.date
+      }
+    }
+
   },
   methods: {
     async submit() {
@@ -36,11 +51,21 @@ export default {
           category: this.category,
           publicationDate: this.publicationDate
         }
-        const response = await this.axios.post('/blogs', data)
+
+        const url = this.blog ? `/blogs/${this.blog.id}` : '/blogs'
+        const message = this.blog ? `Post Updated successfully` : 'Added Post successfully'
+        const eventName = this.blog ? 'updated-post' : 'add-post'
+
+        let response = null
+        if (this.blog) {
+         response = await this.axios.put(url, data)
+        } else {
+          response = await this.axios.post(url, data)
+        }
 
         if (response.status === 200) {
           await swal({
-            text: "Added post successfully",
+            text: message,
             icon: "success",
             closeOnClickOutside: false,
           });
@@ -51,7 +76,7 @@ export default {
           this.category = ''
           this.publicationDate = ''
 
-          this.$emit('add-post', response)
+          this.$emit(eventName, response)
         }
       } catch (err) {
         await swal({
@@ -73,7 +98,7 @@ export default {
         <!-- Modal header -->
         <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            Add New Blog
+            {{blog ? 'Edit Post' : 'Add Post'}}
           </h3>
           <button type="button" @click="$emit('hide-modal')" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -114,7 +139,7 @@ export default {
           </div>
           <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
-            Add new product
+            Submit
           </button>
         </form>
       </div>
