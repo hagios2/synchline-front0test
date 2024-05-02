@@ -21,16 +21,19 @@ export default {
     }
   },
   watch: {
-    blog(blog) {
+    blog(newVal, oldvalue) {
       // eslint-disable-next-line no-console
-      console.log('blog', blog)
+      console.log('blog', newVal)
 
-      if (blog) {
-        this.editorData = blog.body
-        this.title = blog.title
-        this.tags = blog.tags?.toString()
-        this.category = blog.category
-        this.publicationDate = blog.date
+      // eslint-disable-next-line no-console
+      console.log('blog', oldvalue)
+
+      if (newVal) {
+        this.editorData = newVal.body
+        this.title = newVal.title
+        this.tags = newVal.tags?.toString()
+        this.category = newVal.category
+        this.publicationDate = newVal.date
       }
     }
 
