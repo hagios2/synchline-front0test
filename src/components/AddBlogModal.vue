@@ -8,47 +8,55 @@ export default {
   data() {
     return {
       editor: ClassicEditor,
-      editorData: '<p>Content of the editor.</p>',
+      editorData: '<p></p>',
       editorConfig: {},
       showAddPostModal: 'none',
       title: '',
       tags: '',
       category: '',
-      publicationDate: ''
+      publicationDate: '',
+      titleErr: false,
+      categoryErr: false,
+      editorDataErr: false,
     }
   },
   methods: {
     async submit() {
-      const data = {
-        title: this.title,
-        tag: this.tags.split(','),
-        content: this.editorData,
-        // category: this.category?._id ?? '662f2e85aef4af2d960b3d60',
-        publicationDate: this.publicationDate
+      if (this.category === '' || this.editorData === '<p></p>' || this.title === '') {
+        this.titleErr = this.title === ''
+        this.editorDataErr = this.editorData === '<p></p>'
+        this.categoryErr = this.category === ''
+        return
       }
-      const response = await this.axios.post('/blogs', data)
+      try {
+        const data = {
+          title: this.title,
+          tag: this.tags.split(','),
+          content: this.editorData,
+          category: this.category,
+          publicationDate: this.publicationDate
+        }
+        const response = await this.axios.post('/blogs', data)
 
-      // // eslint-disable-next-line no-console
-      // console.log(response.data.error)
+        if (response.status === 200) {
+          await swal({
+            text: "Added post successfully",
+            icon: "success",
+            closeOnClickOutside: false,
+          });
 
-      if (response.status === 200) {
+          this.title = ''
+          this.tags = ''
+          this.editorData = '<p></p>'
+          this.category = ''
+          this.publicationDate = ''
+
+          this.$emit('add-post', response)
+        }
+      } catch (err) {
         await swal({
-          text: "Added post successfully",
-          icon: "success",
-          closeOnClickOutside: false,
-        });
-
-        this.title = ''
-        this.tags = ''
-        this.editorData = ''
-        this.category = ''
-        this.publicationDate = ''
-
-        this.$emit('add-post', response)
-      } else  {
-        await swal({
-          text: response.data,
-          icon: "success",
+          text: err.data.error,
+          icon: "error",
           closeOnClickOutside: false,
         });
       }
@@ -80,7 +88,7 @@ export default {
             <div class="col-span-2">
               <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
               <input v-model="title" type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-3 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type product name" required="">
-              <small class="text-red-700">Name is Required </small>
+              <small v-if="titleErr" class="text-red-700">Name is Required </small>
             </div>
             <div class="col-span-2">
               <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tags (Ex: Fashion, Tech)</label>
@@ -90,9 +98,9 @@ export default {
               <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
               <select v-model="category" id="icategory" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                 <option value="">Select category</option>
-                <option v-for="category in categories" :key="category._id" :value="category">{{category.name}}</option>
+                <option v-for="cat in categories" :key="cat._id" :value="cat._id">{{cat.name}}</option>
               </select>
-              <small class="text-red-700">Category is Required </small>
+              <small v-if="categoryErr" class="text-red-700">Category is Required </small>
             </div>
             <div class="col-span-2 sm:col-span-1">
               <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Publication Date</label>
@@ -101,7 +109,7 @@ export default {
             <div id="app" class="col-span-2">
               <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
               <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
-              <small class="text-red-700">Content is Required </small>
+              <small v-if="editorDataErr" class="text-red-700">Content is Required </small>
             </div>
           </div>
           <button type="submit" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

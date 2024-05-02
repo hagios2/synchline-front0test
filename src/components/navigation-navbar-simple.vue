@@ -17,6 +17,7 @@
                 <a class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" href="#">Home</a>
                 <a class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" href="#">Blog</a>
                 <a class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" href="#">About us</a>
+                <RouterLink to="/register" class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" v-show="!isTokenSet">Register</RouterLink>
                 <RouterLink to="/login" class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" v-show="!isTokenSet">Login</RouterLink>
                 <a class="my-1 text-gray-800 hover:text-blue-500 md:mx-4 md:my-0" href="javascript:void(0);" @click="logout()" v-show="isTokenSet">Logout</a>
             </div>
@@ -26,7 +27,6 @@
 
 <script>
 import Cookies from 'js-cookie';
-import axios from "axios";
     export default {
         data() {
             return {
@@ -46,12 +46,13 @@ import axios from "axios";
         },
         methods: {
           async logout() {
-            await axios.post('http://localhost:6000/auth/logout', {
+            await this.axios.post('/auth/logout', {
               refreshToken: Cookies.get('refreshToken')
             })
 
             Cookies.remove('authToken')
             Cookies.remove('refreshToken')
+            Cookies.remove('authUser')
             await this.$router.push('/login')
           }
         }

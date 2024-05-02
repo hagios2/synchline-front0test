@@ -1,5 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie'
+import router from '@/router/index';
+
 axios.interceptors.request.use(
     config => {
         const token = Cookies.get('authToken')
@@ -23,13 +25,18 @@ axios.interceptors.response.use(
     error => {
         if (error.response) {
             if (error.response.status === 401) {
-                this.$router.push('/login')
-            } else if (error.response.status === 422) {
-                // eslint-disable-next-line no-console
-                console.log('logging ', error.response)
+                if (router.path !== '/login') {
+                    router.push('/login')
+                } else {
+                    return Promise.reject(error.response);
+                }
+            } else if (error.response.status === 403 && error.response.data.error == 'Token expired' ) {
+                Cookies.remove('authToken')
+                Cookies.remove('refreshToken')
+                Cookies.remove('authUser')
+                router.push('/login')
             } else {
-                // eslint-disable-next-line no-console
-                console.log('An error occurred. Please try again later.', error.response)
+                return Promise.reject(error.response);
             }
         }
         // Handle response error

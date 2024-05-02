@@ -1,6 +1,6 @@
 <template>
   <div>
-<!--    <navbar-component></navbar-component>-->
+    <!--    <navbar-component></navbar-component>-->
     <main>
       <section class="absolute w-full h-full">
         <div
@@ -17,7 +17,7 @@
                 <div class="rounded-t mb-0 px-6 py-6">
                   <div class="text-center mb-3">
                     <h6 class="text-gray-600 text-sm font-bold">
-                      Sign in with
+                      Register with
                     </h6>
                   </div>
                   <div class="btn-wrapper text-center">
@@ -57,6 +57,20 @@
                       <label
                           class="block uppercase text-gray-700 text-xs font-bold mb-2"
                           for="grid-password"
+                      >Username</label
+                      ><input
+                        v-model="username"
+                        type="text"
+                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                        placeholder="Email"
+                        style="transition: all 0.15s ease 0s;"
+                    />
+                      <small class="text-red-600" v-show="showUsernameErr">Username is required</small>
+                    </div>
+                    <div class="relative w-full mb-3">
+                      <label
+                          class="block uppercase text-gray-700 text-xs font-bold mb-2"
+                          for="grid-password"
                       >Email</label
                       ><input
                         v-model="email"
@@ -81,25 +95,35 @@
                     />
                       <small class="text-red-600" v-show="showPasswordErr"> Password is required</small>
                     </div>
+                    <div class="relative w-full mb-3">
+                      <label
+                          class="block uppercase text-gray-700 text-xs font-bold mb-2"
+                          for="grid-password"
+                      >Confirm Password</label
+                      ><input
+                        v-model="confirmPassword"
+                        type="password"
+                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                        placeholder="Password"
+                        style="transition: all 0.15s ease 0s;"
+                    />
+                      <small class="text-red-600" v-show="showConPasswordErr">Confirm Password is required</small>
+                      <small class="text-red-600" v-show="showMisMatch">Password Mismatch</small>
+                    </div>
                     <div class="text-center mt-6">
                       <button
                           class="bg-gray-900 text-white active:bg-gray-700 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
                           type="submit"
                           style="transition: all 0.15s ease 0s;"
                       >
-                        Sign in
+                        Sign Up
                       </button>
                     </div>
                   </form>
-                  <div class="flex flex-wrap">
-                    <div class="w-1/2 text-right px-3" >
-                      <a href="#pablo" class="text-gray-600"
-                      ><small>Forgot Password</small></a
-                      >
-                    </div>
+                  <div class="flex flex-wrap mt-4 text-center">
                     <div class="w-1/2">
-                      <RouterLink to="/register" class="text-gray-600"
-                      ><small>Register</small></RouterLink
+                      <RouterLink to="/login" class="text-gray-600"
+                      ><small>Login</small></RouterLink
                       >
                     </div>
                   </div>
@@ -113,41 +137,55 @@
   </div>
 </template>
 <script>
-import Cookies from 'js-cookie';
+import swal from "sweetalert";
 
 export default {
-  name: "login-page",
+  name: "register-page",
   data() {
     return {
       email: '',
+      username: '',
       password: '',
+      confirmPassword: '',
       showEmailErr: false,
+      showUsernameErr: false,
+      showConPasswordErr: false,
       showPasswordErr: false,
+      showMisMatch: false,
       responseErr: ''
     }
   },
   methods: {
     async login() {
       try {
-        if (this.email === '' || this.password === '') {
+        if (this.email === '' || this.password === '' || this.confirmPassword === '' || this.password !== this.confirmPassword || this.username === '') {
           this.showEmailErr = this.email === '';
+          this.showUsernameErr = this.username === '';
           this.showPasswordErr = this.password === '';
+          this.showConPasswordErr = this.confirmPassword === '';
+          this.showMisMatch = this.confirmPassword !== this.password;
           return
         }
 
-        const response = await this.axios.post('/auth/login', {email: this.email, password: this.password})
-        this.responseErr = ''
+        const response = await this.axios.post('/auth/signup', {email: this.email, password: this.password, username: this.username})
 
-        if (response.data.data.token) {
-          Cookies.set('authToken', response.data.data.token);
-          Cookies.set('refreshToken', response.data.data.refreshToken);
-          Cookies.set('authUser', response.data.data.authUser);
-          await this.$router.push('/')
+        this.responseErr = ''
+        if (response.status === 200) {
+          await this.$router.push('/login')
         }
+
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.log('in how', err.response)
+        console.log(err.response)
+        if (err.response.status === 422) {
           this.responseErr = err.response.data.error
+        } else {
+          swal({
+            text: 'Something went wrong',
+            icon: "error",
+            closeOnClickOutside: false,
+          }).then(()=> {});
+        }
       }
     }
   }

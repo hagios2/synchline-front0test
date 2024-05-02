@@ -22,7 +22,7 @@
                   @hide-modal="showCommentModal=false"
               />
             </div>
-            <font-awesome-icon icon="fa-solid fa-house" />
+<!--            <font-awesome-icon icon="fa-solid fa-house" />-->
             <div v-show="isAuth">
               <a @click="likePost(data.id)" class="text-blue-500 hover:underline mr-0.25" href="javascript:void(0);">Like &emsp13; {{data.likes.length > 0 ? data.likes.length : ''}}</a>
             </div>
